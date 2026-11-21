@@ -1,0 +1,17 @@
+{
+  "name": "dingtalk-build-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "钉钉群 @机器人 触发 Jenkins 打包的桥接服务（Stream 模式）",
+  "type": "module",
+  "engines": {
+    "node": ">=20.12"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/index.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "dingtalk-stream": "2.1.5"
+  }
+}
