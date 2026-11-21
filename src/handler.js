@@ -69,12 +69,13 @@ export function createHandler({ config, jenkins, reply, logger = console, wait =
       return;
     }
 
-    const summary = `${command.httpEnv} · ${command.branch} · ${command.channel}${command.runChecks ? ' · 含检查' : ''}`;
+    const platformLabel = command.platform === 'ios' ? 'iOS' : 'Android';
+    const summary = `${platformLabel} · ${command.httpEnv} · ${command.branch} · ${command.channel}${command.runChecks ? ' · 含检查' : ''}`;
     let location;
     try {
       const backlog = await jenkins.backlog().catch(() => null);
       location = await jenkins.trigger({
-        PLATFORM: 'android',
+        PLATFORM: command.platform,
         HTTP_ENV: command.httpEnv,
         BRANCH: command.branch,
         CHANNEL: command.channel,

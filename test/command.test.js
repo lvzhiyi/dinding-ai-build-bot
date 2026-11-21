@@ -10,6 +10,7 @@ test('空消息和帮助返回用法', () => {
 test('只写「打包」使用默认值', () => {
   assert.deepEqual(parseCommand(' 打包', { defaultBranch: 'develop' }), {
     type: 'build',
+    platform: 'android',
     httpEnv: 'qa',
     branch: 'develop',
     channel: 'official',
@@ -21,6 +22,7 @@ test('只写「打包」使用默认值', () => {
 test('解析环境、分支、渠道、检查和带空格的说明', () => {
   assert.deepEqual(parseCommand('打包 pro release/1.2.0 渠道=huawei 检查 说明=修复 登录 问题'), {
     type: 'build',
+    platform: 'android',
     httpEnv: 'pro',
     branch: 'release/1.2.0',
     channel: 'huawei',
@@ -44,4 +46,12 @@ test('非法分支、渠道、超长说明和多余参数被拒绝', () => {
   assert.equal(parseCommand(`打包 说明=${'字'.repeat(201)}`).type, 'error');
   assert.equal(parseCommand('打包 main develop').type, 'error');
   assert.equal(parseCommand('发布 main').type, 'error');
+});
+
+test('平台参数独立于分支，拒绝未知或重复平台', () => {
+  assert.equal(parseCommand('打包 qa ios').branch, 'ios');
+  assert.equal(parseCommand('打包 qa ios').platform, 'android');
+  assert.equal(parseCommand('打包 platform=Android').platform, 'android');
+  assert.equal(parseCommand('打包 平台=mac').type, 'error');
+  assert.equal(parseCommand('打包 平台=ios 平台=android').type, 'error');
 });

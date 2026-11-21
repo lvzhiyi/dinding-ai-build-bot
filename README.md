@@ -9,13 +9,14 @@
 ## 指令
 
 ```
-@打包机器人 打包 [qa|pro] [分支] [渠道=xxx] [检查] [说明=更新说明]
+@打包机器人 打包 [平台=android|ios] [qa|pro] [分支] [渠道=xxx] [检查] [说明=更新说明]
 @打包机器人 帮助
 ```
 
 | 示例 | 含义 |
 | --- | --- |
-| `打包` | qa、默认分支（`DEFAULT_BRANCH`）、渠道 official |
+| `打包 平台=ios qa main` | 从 main 分支构建 iOS QA 包（Ad Hoc IPA） |
+| `打包` | Android、qa、默认分支（`DEFAULT_BRANCH`）、渠道 official |
 | `打包 qa feature/login 说明=修复登录` | 指定分支和蒲公英更新说明（说明可含空格，须放最后） |
 | `打包 pro release/1.2.0 渠道=huawei 检查` | pro 包，构建前跑 `check.py full`，需 pro 白名单 |
 

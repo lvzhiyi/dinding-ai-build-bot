@@ -132,3 +132,15 @@ test('Jenkins 失败时回复且不泄露凭据', async () => {
 test('缺必填配置时启动失败', () => {
   assert.throws(() => loadConfig({}), /DINGTALK_CLIENT_ID/);
 });
+
+test('iOS 构建透传平台与分支，沿用 pro 白名单', async () => {
+  const { handle, triggered, replies } = setup();
+  await handle(message('打包 平台=iOS pro develop'));
+  assert.equal(triggered.length, 0);
+  await handle(message('打包 平台=iOS qa develop'));
+  assert.equal(triggered.length, 1);
+  assert.equal(triggered[0].PLATFORM, 'ios');
+  assert.equal(triggered[0].HTTP_ENV, 'qa');
+  assert.equal(triggered[0].BRANCH, 'develop');
+  assert.match(replies[1], /iOS · qa · develop/);
+});

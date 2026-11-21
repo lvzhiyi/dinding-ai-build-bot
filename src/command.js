@@ -5,11 +5,12 @@ export const CHANNEL_PATTERN = /^[A-Za-z0-9_]{1,32}$/;
 export const MAX_DESC_LENGTH = 200;
 
 export const HELP_TEXT = [
-  '用法：@机器人 打包 [qa|pro] [分支] [渠道=xxx] [检查] [说明=更新说明]',
+  '用法：@机器人 打包 [平台=android|ios] [qa|pro] [分支] [渠道=xxx] [检查] [说明=更新说明]',
   '例：打包',
+  '例：打包 平台=ios qa main',
   '例：打包 qa feature/login 说明=修复登录',
   '例：打包 pro release/1.2.0 渠道=huawei 检查',
-  '默认 qa、默认分支、渠道 official；「检查」表示构建前执行 check.py full。',
+  '默认 Android、qa、默认分支、渠道 official；「检查」表示构建前执行 check.py full。',
 ].join('\n');
 
 const BUILD_WORDS = new Set(['打包', 'build']);
@@ -18,7 +19,7 @@ const CHECK_WORDS = new Set(['检查', 'check']);
 
 /**
  * @returns {{type:'help'} | {type:'error', message:string} |
- *   {type:'build', httpEnv:string, branch:string, channel:string, runChecks:boolean, updateDesc:string}}
+ *   {type:'build', platform:'android'|'ios', httpEnv:string, branch:string, channel:string, runChecks:boolean, updateDesc:string}}
  */
 export function parseCommand(text, { defaultBranch = 'main' } = {}) {
   const content = (text ?? '').trim();
@@ -41,6 +42,7 @@ export function parseCommand(text, { defaultBranch = 'main' } = {}) {
 
   const result = {
     type: 'build',
+    platform: 'android',
     httpEnv: 'qa',
     branch: defaultBranch,
     channel: 'official',
@@ -48,10 +50,20 @@ export function parseCommand(text, { defaultBranch = 'main' } = {}) {
     updateDesc,
   };
   let branchSet = false;
+  let platformSet = false;
   for (const token of tokens) {
     const lower = token.toLowerCase();
     const channelMatch = token.match(/^(?:渠道|channel)[=＝:：](.*)$/);
-    if (lower === 'qa' || lower === 'pro') {
+    const platformMatch = lower.match(/^(?:平台|platform)[=＝:：](.*)$/);
+    if (platformMatch) {
+      if (platformSet) return { type: 'error', message: '每条打包指令只能指定一次平台' };
+      const platform = platformMatch[1];
+      if (platform !== 'ios' && platform !== 'android') {
+        return { type: 'error', message: '平台只支持 android 或 ios' };
+      }
+      result.platform = platform;
+      platformSet = true;
+    } else if (lower === 'qa' || lower === 'pro') {
       result.httpEnv = lower;
     } else if (CHECK_WORDS.has(lower)) {
       result.runChecks = true;
